@@ -12,7 +12,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements HttpAsyncGet.TaskDelegate {
     private Activity mActivity;
-    private ArrayList<ItemsElements> mResources;
+    private ArrayList<ItemsElements> mResources = new ArrayList<>();
+    private ContactsAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,28 +22,28 @@ public class MainActivity extends AppCompatActivity implements HttpAsyncGet.Task
         mActivity = this;
 
         RecyclerView rvItems = (RecyclerView) findViewById(R.id.rvContacts);
-        // new HttpAsyncGet(this, 10).execute("https://dexonline.ro/rss/cuvantul-zilei");
-        final List<Contact> allContacts = Contact.createContactsList(mActivity, 5, 0);
+        new HttpAsyncGet(this, 10, 0).execute("https://dexonline.ro/rss/cuvantul-zilei");
+        // final List<Contact> allContacts = Contact.createContactsList(mActivity, 5, 0);
 
-        final ContactsAdapter adapter = new ContactsAdapter(allContacts);
+        mAdapter = new ContactsAdapter(mResources);
 
-        rvItems.setAdapter(adapter);
+        rvItems.setAdapter(mAdapter);
 
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         rvItems.setLayoutManager(linearLayoutManager);
         EndlessRecyclerViewScrollListener scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                List<Contact> moreContacts = Contact.createContactsList(mActivity, 5, page * 5);
+                // List<Contact> moreContacts = Contact.createContactsList(mActivity, 5, page * 5);
+                new HttpAsyncGet(mActivity, 5, page * 5).execute("https://dexonline.ro/rss/cuvantul-zilei");
+                // mResources.addAll(moreContacts);
 
-                allContacts.addAll(moreContacts);
-
-                view.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        adapter.notifyItemRangeInserted(adapter.getItemCount(), allContacts.size() - 1);
-                    }
-                });
+//                view.post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        mAdapter.notifyItemRangeInserted(mAdapter.getItemCount(), mResources.size() - 1);
+//                    }
+//                });
             }
         };
         rvItems.addOnScrollListener(scrollListener);
@@ -50,7 +51,8 @@ public class MainActivity extends AppCompatActivity implements HttpAsyncGet.Task
 
     @Override
     public void updateList(ArrayList<ItemsElements> resources) {
-        mResources = resources;
+        mResources.addAll(resources);
+        mAdapter.notifyItemRangeInserted(mAdapter.getItemCount(), mResources.size() - 1);
     }
 }
 

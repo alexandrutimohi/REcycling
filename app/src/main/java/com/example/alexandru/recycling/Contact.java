@@ -41,7 +41,7 @@ public class Contact {
 
             for (int i = offset; i < number_of_items; i++) {
                 Bitmap b = BitmapFactory.decodeFile(listOfFiles[i].getAbsolutePath());
-                contacts.add(new Contact("Person " + ++lastContactId + " offset: " + offset, b));
+                contacts.add(new Contact(listOfFiles[i].getName(), b));
             }
         }
         return contacts;

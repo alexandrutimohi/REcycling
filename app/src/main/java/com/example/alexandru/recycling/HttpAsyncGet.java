@@ -9,7 +9,6 @@ import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.os.Messenger;
 import android.text.Html;
 import android.util.Log;
 
@@ -36,7 +35,6 @@ public class HttpAsyncGet extends AsyncTask<String, Integer, Integer> {
     private static final String TITLE = "title";
     private static final String DESCRIPTION = "description";
     private static final String TAG = "Async";
-    private Messenger mMessenger;
     private String[] mResponse = new String[2];
     private TaskDelegate delegate;
     private ArrayList<ItemsElements> mResources = new ArrayList<ItemsElements>();
@@ -44,13 +42,14 @@ public class HttpAsyncGet extends AsyncTask<String, Integer, Integer> {
 
     private ProgressDialog dialog;
     private int buffer_length = 0;
+    private int offset = 0;
 
-    public HttpAsyncGet(Activity activity, int buffer_length) {
+    public HttpAsyncGet(Activity activity, int buffer_length, int offset) {
         mActivity = activity;
         this.buffer_length = buffer_length;
         dialog = new ProgressDialog(activity);
         delegate = (TaskDelegate) activity;
-
+        this.offset = offset;
     }
 
     public interface TaskDelegate {
@@ -65,10 +64,6 @@ public class HttpAsyncGet extends AsyncTask<String, Integer, Integer> {
         String sResponse = text.substring(begin_tag_index + begin_tag.length(), end_tag_index);
         //Log.e(TAG, tag + ": " + sResponse);
         return sResponse;
-    }
-
-    private void getItems(String response) {
-
     }
 
     @Override
@@ -98,10 +93,9 @@ public class HttpAsyncGet extends AsyncTask<String, Integer, Integer> {
                 String image;
                 String link;
                 server_response = readStream(urlConnection.getInputStream());
-
-                //for(int i = 0; i<buffer_length; i++) {
-                    while (server_response.substring(server_response.indexOf("<item>")) != "") {
-                        server_response = server_response.substring(server_response.indexOf("<item>") + 6);
+                for(int i = 0; i<buffer_length; i++) {
+                    //while (server_response.substring(server_response.indexOf("<item>")) != "") {
+                        server_response = server_response.substring(server_response.indexOf("<item>") + 6, offset * i);
                         title = getFromHtmlTag(server_response, "title");
                         link = getFromHtmlTag(server_response, "link");
                         desc = getFromHtmlTag(server_response, "description");
@@ -127,7 +121,7 @@ public class HttpAsyncGet extends AsyncTask<String, Integer, Integer> {
                         out.flush();
                         out.close();
                         //Elements elem = new MainActivity.Elements(title, desc, link);
-                        mResources.add(new ItemsElements(title, desc, link));
+                        mResources.add(new ItemsElements(title, desc, link, bitmap));
                     //}
                 }
             }
@@ -149,6 +143,7 @@ public class HttpAsyncGet extends AsyncTask<String, Integer, Integer> {
     protected void onPostExecute(Integer result) {
         Log.v(TAG, "Downloaded " + result / 1024 + " KBytes");
         dialog.dismiss();
+
         delegate.updateList(mResources);
     }
 

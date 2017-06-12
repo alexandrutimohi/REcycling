@@ -10,7 +10,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Created by Alexandru on 6/12/2017.
@@ -19,10 +19,10 @@ import java.util.List;
 public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHolder> {
 
     // Store a member variable for the contacts
-    private List<Contact> mContacts;
+    private ArrayList<ItemsElements> mContacts;
 
     // Pass in the contact array into the constructor
-    public ContactsAdapter(List<Contact> contacts) {
+    public ContactsAdapter(ArrayList<ItemsElements> contacts) {
         mContacts = contacts;
     }
 
@@ -59,10 +59,10 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
-        Contact contact = mContacts.get(position);
+        ItemsElements contact = mContacts.get(position);
 
         TextView textView = viewHolder.nameTextView;
-        textView.setText(contact.getName());
+        textView.setText(contact.getTitle());
 
         ImageView image = viewHolder.imageImageView;
         image.setImageBitmap(contact.getImage());
